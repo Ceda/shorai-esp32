@@ -41,10 +41,15 @@ class OTAUpdater:
         print('\tLatest version: ', latest_version)
         if latest_version > current_version:
             print('New version available, will download and install on next reboot')
-            os.mkdir(self.modulepath('next'))
-            with open(self.modulepath('next/.version_on_reboot'), 'w') as versionfile:
-                versionfile.write(latest_version)
-                versionfile.close()
+            if 'next' in os.listdir(self.module):
+                print('Next-Folder already existing and apply pending update')
+                self.apply_pending_updates_if_available()
+            else:
+                print('Create Next-Folder.')
+                os.mkdir(self.modulepath('next'))
+                with open(self.modulepath('next/.version_on_reboot'), 'w') as versionfile:
+                    versionfile.write(latest_version)
+                    versionfile.close()
 
     def download_and_install_update_if_available(self, ssid, password):
         if 'next' in os.listdir(self.module):
