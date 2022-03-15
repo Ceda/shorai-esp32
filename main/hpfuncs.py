@@ -105,30 +105,26 @@ def setpointVal(msg):
         myvalues = False
     return myvalues
 
-     
 def queryall():
      bootlist = []
-     bootlist.append((2,0,3,16,0,0,6,1,48,1,0,1,128,52))
-     bootlist.append((2,0,3,16,0,0,6,1,48,1,0,1,176,4))
-     bootlist.append((2,0,3,16,0,0,6,1,48,1,0,1,179,1))
-     bootlist.append((2,0,3,16,0,0,6,1,48,1,0,1,160,20))
-     bootlist.append((2,0,3,16,0,0,6,1,48,1,0,1,135,45))
-     bootlist.append((2,0,3,16,0,0,6,1,48,1,0,1,163,17))
-     bootlist.append((2,0,3,16,0,0,6,1,48,1,0,1,187,249))
-     bootlist.append((2,0,3,16,0,0,6,1,48,1,0,1,190,246))
+     bootlist.append((2,0,3,16,0,0,6,1,48,1,0,1,128,52))  # POWER_STATE
+     bootlist.append((2,0,3,16,0,0,6,1,48,1,0,1,176,4))   # UNIT_MODE
+     bootlist.append((2,0,3,16,0,0,6,1,48,1,0,1,179,1))   # TEMP_PRESET
+     bootlist.append((2,0,3,16,0,0,6,1,48,1,0,1,160,20))  # FAN_MODE
+     bootlist.append((2,0,3,16,0,0,6,1,48,1,0,1,135,45))  # POWER_SEL
+     bootlist.append((2,0,3,16,0,0,6,1,48,1,0,1,163,17))  # SWING_STATE
+     bootlist.append((2,0,3,16,0,0,6,1,48,1,0,1,187,249)) # TEMP_INDOOR
+     bootlist.append((2,0,3,16,0,0,6,1,48,1,0,1,190,246)) # TEMP_OUTDOOR
      bootlist.append((2,0,3,16,0,0,6,1,48,1,0,1,203,233))
      bootlist.append((2,0,3,16,0,0,6,1,48,1,0,1,136,44))
      #bootlist.append((2,0,3,16,0,0,6,1,48,1,0,1,134,46))
-     bootlist.append((2,0,3,16,0,0,6,1,48,1,0,1,144,36))
-     bootlist.append((2,0,3,16,0,0,6,1,48,1,0,1,148,32))
-     return bootlist    
-
+     bootlist.append((2,0,3,16,0,0,6,1,48,1,0,1,144,36))  # TIMER_ON
+     bootlist.append((2,0,3,16,0,0,6,1,48,1,0,1,148,32))  # TIMER_OFF
+     return bootlist
 
 def watchdog():
     bootlist = []
-    bootlist.append((2,0,3,16,0,0,6,1,48,1,0,1,187,249))
-    bootlist.append((2,0,3,16,0,0,6,1,48,1,0,1,190,246))
+    bootlist.append((2,0,3,16,0,0,6,1,48,1,0,1,176,4))   # UNIT_MODE
+    bootlist.append((2,0,3,16,0,0,6,1,48,1,0,1,187,249)) # TEMP_INDOOR
+    bootlist.append((2,0,3,16,0,0,6,1,48,1,0,1,190,246)) # TEMP_OUTDOOR
     return bootlist
-
-
-
