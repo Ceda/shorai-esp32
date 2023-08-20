@@ -9,9 +9,6 @@ from config import config
 import time
 from time import sleep
 import machine
-power_state = 'OFF'
-
-
 
 #topic_prefix = "heatpump"
 #mqtt_server = '192.168.2.30'
@@ -35,10 +32,9 @@ def int_to_signed(intval):
 
 #mqtt stuff
 def sub_cb(topic, msg, retained):
-    global power_state
     runwrite = True
     hpfuncs.logprint(str(topic) + " -- " + str(msg))
-################################################ 
+################################################
 #setpoint
     if topic == topic_sub_setp:
         try:
@@ -46,15 +42,15 @@ def sub_cb(topic, msg, retained):
         except Exception as e:
             hpfuncs.logprint(e)
             runwrite = False
-################################################ 
+################################################
 #restart
     if topic == topic_sub_restart:
         try:
             machine.reset()
         except Exception as e:
             hpfuncs.logprint(e)
-            runwrite = False            
-################################################        
+            runwrite = False
+################################################
 # state
     elif topic == topic_sub_state:
         try:
@@ -64,7 +60,7 @@ def sub_cb(topic, msg, retained):
         except Exception as e:
             hpfuncs.logprint(e)
             runwrite = False
-################################################        
+################################################
 # swingstate
     elif topic == topic_sub_swingmode:
         try:
@@ -74,16 +70,21 @@ def sub_cb(topic, msg, retained):
         except Exception as e:
             hpfuncs.logprint(e)
             runwrite = False
-################################################        
+################################################
 # mode
     elif topic == topic_sub_mode:
         try:
+            if msg.decode("utf-8") == 'off':
+                values = hpfuncs.stateControl(b'OFF')
+            else:
+                values = hpfuncs.stateControl(b'ON')
             values = hpfuncs.modeControl(msg)
             if values == False:
                 runwrite = False
         except Exception as e:
             hpfuncs.logprint(e)
             runwrite = False
+
 ################################################
 # fanmode
     elif topic == topic_sub_fanmode:
@@ -113,7 +114,7 @@ def sub_cb(topic, msg, retained):
             uart.write(bytearray(i))
             sleep(0.2)
         runwrite = False
-################################################ 
+################################################
     if runwrite == True and values != False:
         #print(values)
         for i in values:
@@ -121,7 +122,6 @@ def sub_cb(topic, msg, retained):
             uart.write(bytearray(i))
             sleep(0.2)
 
-        
 def chunkifyarray(vals):
     val_length = len(vals)
     start = 0
@@ -132,16 +132,15 @@ def chunkifyarray(vals):
         chunk_size = lengde + 8
         chunk_end = start + int(vals[start+6]) + 8
         myresult.append(vals[start:chunk_end])
-        start = (start + chunk_size) 
+        start = (start + chunk_size)
         rest_size = rest_size - chunk_size
     return myresult
-
 
 # subscribe to topics
 async def conn_han(client):
     for i in topics:
         await client.subscribe(i,1)
-        
+
 # first run to collect values and run watchdog
 async def firstrun(client):
     firstrun = False
@@ -156,8 +155,6 @@ async def firstrun(client):
         hpfuncs.logprint("running watchdog..")
 
 async def receiver(client):
-    global power_state
-    
     sreader = asyncio.StreamReader(uart)
     try:
         while True:
@@ -180,11 +177,7 @@ async def receiver(client):
                             await client.publish(config['maintopic'] + '/setpoint/state', str(setpoint), qos=1)
                         if(str(data[14]) == "128"):
                             state = hpfuncs.inttostate[int(data[15])]
-                            power_state = state
                             await client.publish(config['maintopic'] + '/state/state', str(state), qos=1)
-                            if (state == "OFF"):
-                                # when power state is OFF, sent unit mode also as "off"
-                                await client.publish(config['maintopic'] + '/mode/state', "off", qos=1)
                         if(str(data[14]) == "160"):
                             fanmode = hpfuncs.inttofanmode[int(data[15])]
                             await client.publish(config['maintopic'] + '/fanmode/state', str(fanmode), qos=1)
@@ -192,10 +185,7 @@ async def receiver(client):
                             swingmode = hpfuncs.inttoswing[int(data[15])]
                             await client.publish(config['maintopic'] + '/swingmode/state', str(swingmode), qos=1)
                         if(str(data[14]) == "176"):
-                            mode = hpfuncs.inttomode[int(data[15])]
-                            # report actual mode when unit is running or "off" when it's not
-                            reportedState = str(mode) if (power_state == "ON") else "off"
-                            await client.publish(config['maintopic'] + '/mode/state', reportedState, qos=1) 
+                            await client.publish(config['maintopic'] + '/mode/state', str(mode), qos=1)
                         if(str(data[14]) == "190"):
                             outdoortemp = int_to_signed(int(data[15]))
                             await client.publish(config['maintopic'] + '/outdoortemp', str(outdoortemp), qos=1)
@@ -208,11 +198,7 @@ async def receiver(client):
                             await client.publish(config['maintopic'] + '/setpoint/state', str(setpoint), qos=1)
                         if(str(data[12]) == "128"):
                             state = hpfuncs.inttostate[int(data[13])]
-                            power_state = state
                             await client.publish(config['maintopic'] + '/state/state', str(state), qos=1)
-                            if (state == "OFF"):
-                                # when power state is OFF, sent unit mode also as "off"
-                                await client.publish(config['maintopic'] + '/mode/state', "off", qos=1)
                         if(str(data[12]) == "160"):
                             fanmode = hpfuncs.inttofanmode[int(data[13])]
                             await client.publish(config['maintopic'] + '/fanmode/state', str(fanmode), qos=1)
@@ -221,13 +207,11 @@ async def receiver(client):
                             await client.publish(config['maintopic'] + '/swingmode/state', str(swingmode), qos=1)
                         if(str(data[12]) == "176"):
                             mode = hpfuncs.inttomode[int(data[13])]
-                            # report actual mode when unit is running or "off" when it's not
-                            reportedState = str(mode) if (power_state == "ON") else "off"
-                            await client.publish(config['maintopic'] + '/mode/state', reportedState, qos=1) 
+                            await client.publish(config['maintopic'] + '/mode/state', str(mode), qos=1)
                         if(str(data[12]) == "190"):
                             outdoortemp = int_to_signed(int(data[13]))
                             await client.publish(config['maintopic'] + '/outdoortemp', str(outdoortemp), qos=1)
-     
+
     except Exception as e:
         hpfuncs.logprint(e)
 
@@ -247,5 +231,3 @@ loop.create_task(mainloop(client))
 loop.create_task(receiver(client))
 loop.create_task(firstrun(client))
 loop.run_forever()
-
-

@@ -9,7 +9,7 @@ except Exception as e:
 modetoint = {"auto":65, "cool":66, "heat":67, "dry":68, "fan_only":69}
 inttomode = dict(map(reversed, modetoint.items()))
 
-fanmodetoint = {"quiet":49, "lvl_1": 50, "lvl_2":51, "lvl_3":52, "lvl_4":53, "lvl_5":54, "auto":65} 
+fanmodetoint = {"quiet":49, "lvl_1": 50, "lvl_2":51, "lvl_3":52, "lvl_4":53, "lvl_5":54, "auto":65}
 inttofanmode = dict(map(reversed, fanmodetoint.items()))
 
 swingtoint = {"off": 49, "on":65}
@@ -35,13 +35,11 @@ def logprint(msg):
     timestamp = str(t[2]) + "-" + str(t[1]) + "-" + str(t[0]) + " " + str(t[4]) + ":" + str(t[5]) + ":" + str(t[6]) + "." + str(t[7])
     result = str(timestamp) + " -> " + str(msg)
     print(result)
- 
-
 
 def swingControl(msg):
     function_code = 163
     message = msg.decode("utf-8")
-    
+
     try:
         function_value = swingtoint[message]
         control_code = checksum(function_value,function_code)
@@ -77,8 +75,6 @@ def fanControl(msg):
     except Exception as e:
         myvalues = False
     return myvalues
-
-
 
 def stateControl(msg):
     function_code = 128
